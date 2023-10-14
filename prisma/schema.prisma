@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Entidad Maestra: Supplier
+model Supplier {
+  id        Int       @id @default(autoincrement())
+  name      String
+  purchases Purchase[]  // Relación con la entidad transaccional Purchase
+}
+
+// Entidad Maestra: Item
+model Item {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String
+  price       Float
+  purchases   PurchaseItem[]  // Relación con la tabla intermedia PurchaseItem
+}
+
+// Entidad Transaccional: Purchase
+model Purchase {
+  id        Int           @id @default(autoincrement())
+  date      DateTime
+  supplier  Supplier      @relation(fields: [supplierId], references: [id])
+  supplierId Int
+  items     PurchaseItem[]  // Relación con la tabla intermedia PurchaseItem
+}
+
+// Tabla intermedia para representar la relación many-to-many entre Purchase e Item
+model PurchaseItem {
+  id         Int      @id @default(autoincrement())
+  purchase   Purchase @relation(fields: [purchaseId], references: [id])
+  purchaseId Int
+  item       Item     @relation(fields: [itemId], references: [id])
+  itemId     Int
+  quantity   Int
+}
